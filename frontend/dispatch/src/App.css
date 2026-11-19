@@ -1,0 +1,241 @@
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
+}
+
+.container {
+  padding: 20px;
+  text-align: center;
+}
+
+/* 🔷 HEADER */
+.header {
+  display: flex;
+  /* align-items: center; */
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.logo {
+  width: 185px;
+  height: 75px;
+}
+.header a{
+  padding: 5px 40px;
+  background-color: #f4451c;
+  color: white;
+  border-radius: 25px;
+  font-size: 20px;
+  text-decoration: none;
+  text-align: end;
+}
+ 
+/* 🔷 STATUS */
+.status {
+  margin: 20px auto;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  font-size: 26px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* COLORS */
+.status.OK {
+  background: #16a34a;
+  box-shadow: 0 0 40px #16a34a;
+}
+
+.status.NG {
+  background: #dc2626;
+  box-shadow: 0 0 40px #dc2626;
+}
+
+.status.SCAN {
+  background: gray;
+}
+
+.status.MASTER_SET {
+  background: #2563eb;
+  box-shadow: 0 0 40px #2563eb;
+}
+
+/* 🔷 INSTRUCTIONS */
+.instructions {
+  font-size: 20px;
+  margin: 10px 0;
+}
+
+/* 🔷 SCAN BOX */
+.scan-box {
+  margin: 20px auto;
+  width: 300px;
+  height: 150px;
+  border: 2px solid #334155;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  transition: 0.05s;
+}
+
+.scan-box.active {
+  border-color: #22c55e;
+}
+
+/* 🔥 SCAN LINE */
+.scan-line {
+  position: absolute;
+  width: 100%;
+  height: 3px;
+  background: #22c55e;
+  top: 0;
+  animation: scan 0.5s linear infinite;
+  opacity: 0;
+}
+
+.scan-box.active .scan-line {
+  opacity: 1;
+}
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+/* 🔷 HIDDEN INPUT */
+.hidden-input {
+  position: absolute;
+  opacity: 0;
+}
+
+/* 🔷 MASTER BOX */
+.master-box {
+  margin: 20px auto;
+  padding: 15px;
+  background: #1e293b;
+ text-align: left;
+  border-radius: 10px;
+  height: 87%;
+}
+
+/* 🔷 TABLE */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #334155;
+}
+
+th {
+  background: #1e293b;
+}
+
+.ok-row {
+  background: rgba(22, 163, 74, 0.3);
+}
+
+.ng-row {
+  background: rgba(220, 38, 38, 0.3);
+}
+.status.SCANNING_WAIT {
+  background: #475569;
+  box-shadow: 0 0 30px #475569;
+}
+
+.status.SCANNING {
+  background: #eab308;
+  box-shadow: 0 0 40px #eab308;
+}
+.status.SCAN_PART {
+  background: #9333ea; /* purple */
+  box-shadow: 0 0 40px #9333ea;
+}
+.status.COMPLETE {
+  background: #16a34a;
+  box-shadow: 0 0 50px #16a34a;
+  font-size: 30px;
+}
+
+/* scaning box work  */
+.mainScan_box{
+   display: flex;
+  justify-content: space-between;
+}
+.scan_innerBoxLef{
+     width: 33%;
+}
+.scan_innerBoxrig{
+   width: 33%;
+}
+
+/* 🔷 STATUS1 */
+.status1 {
+  margin: 20px auto;
+  width: 450px;
+  height: 450px;
+  /* border-radius: 50%; */
+  font-size: 26px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* COLORS */
+.status1.OK {
+  background: #16a34a;
+  box-shadow: 0 0 40px #16a34a;
+}
+
+.status1.NG {
+  background: #dc2626;
+  box-shadow: 0 0 40px #dc2626;
+}
+
+.status1.SCAN {
+  background: #0f172a;
+}
+
+.status1.MASTER_SET {
+  background: #2563eb;
+  box-shadow: 0 0 40px #2563eb;
+}
+
+.status1.SCANNING_WAIT {
+  background: #475569;
+  box-shadow: 0 0 30px #475569;
+}
+
+.status1.SCANNING {
+  background: #eab308;
+  box-shadow: 0 0 40px #eab308;
+}
+.status1.SCAN_PART {
+  background: #9333ea; /* purple */
+  box-shadow: 0 0 40px #9333ea;
+}
+.status1.COMPLETE {
+  background: #16a34a;
+  box-shadow: 0 0 50px #16a34a;
+  font-size: 30px;
+}
+
+.alert-box {
+  background: red;
+  color: white;
+  padding: 12px;
+  text-align: center;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 9999;
+  font-weight: bold;
+}
