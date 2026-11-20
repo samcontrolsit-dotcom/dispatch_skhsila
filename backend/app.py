@@ -345,7 +345,7 @@ import qrcode
 import traceback
 
 import win32print
-import win32ui
+# import win32ui
 
 
 # ============================================================

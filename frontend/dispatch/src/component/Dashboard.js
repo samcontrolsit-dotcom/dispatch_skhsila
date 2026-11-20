@@ -1,817 +1,310 @@
-import React, {
-    useState
-} from "react";
+import React, { useState } from "react";
 import logo from "../images/logo.png";
 import axios from "axios";
-
+import { Bar, Pie } from "react-chartjs-2";
 import {
-    Bar,
-    Pie
-} from "react-chartjs-2";
-
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    ArcElement,
-    Tooltip,
-    Legend
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Legend,
 } from "chart.js";
-
+import "./Dashboard.css"; // 👈 import the styles
 
 ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    ArcElement,
-    Tooltip,
-    Legend
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Legend
 );
 
-
-const API_URL =
-    "http://127.0.0.1:8000";
-
+const API_URL = "http://127.0.0.1:8000";
 
 export default function Dashboard() {
-
-
-    const [binNo, setBinNo] =
-        useState("");
-
-
-    const [partNo, setPartNo] =
-        useState("");
-
-
-    const [fromDate, setFromDate] =
-        useState("");
-
-
-    const [toDate, setToDate] =
-        useState("");
-
-
-    const [data, setData] =
-        useState([]);
-
-
-    const [loading, setLoading] =
-        useState(false);
-
-
-    const [error, setError] =
-        useState("");
-
-
-    // =====================================================
-    // SEARCH
-    // =====================================================
-
-    const handleSearch = async () => {
-
-        try {
-
-            setLoading(true);
-
-            setError("");
-
-
-            const res =
-                await axios.get(
-                    `${API_URL}/search`,
-                    {
-                        params: {
-                            bin_no: binNo,
-                            part_no: partNo,
-                            from_date: fromDate,
-                            to_date: toDate
-                        }
-                    }
-                );
-
-
-            if (
-                res.data &&
-                res.data.error
-            ) {
-
-                setError(
-                    res.data.error
-                );
-
-                setData([]);
-
-                return;
-            }
-
-
-            setData(
-                Array.isArray(res.data)
-                    ? res.data
-                    : []
-            );
-
-        }
-        catch (err) {
-
-            console.error(
-                "SEARCH ERROR:",
-                err
-            );
-
-
-            setError(
-                err.response?.data?.error ||
-                err.message ||
-                "Unable to connect to Python server"
-            );
-
-            setData([]);
-
-        }
-        finally {
-
-            setLoading(false);
-
-        }
-
-    };
-
-
-    // =====================================================
-    // COUNTS
-    // =====================================================
-
-    const totalOK =
-        data.reduce(
-            (sum, m) =>
-                sum +
-                Number(m.ok_count || 0),
-            0
-        );
-
-
-    const totalNG =
-        data.reduce(
-            (sum, m) =>
-                sum +
-                Number(m.ng_count || 0),
-            0
-        );
-
-
-    // =====================================================
-    // PIE
-    // =====================================================
-
-    const pieData = {
-
-        labels: [
-            "OK",
-            "NG"
-        ],
-
-        datasets: [
-            {
-                data: [
-                    totalOK,
-                    totalNG
-                ],
-
-                backgroundColor: [
-                    "green",
-                    "red"
-                ]
-            }
-        ]
-
-    };
-
-
-    // =====================================================
-    // BIN-WISE OK
-    // =====================================================
-
-    const barData = {
-
-        labels:
-            data.map(
-                m => m.bin_no
-            ),
-
-        datasets: [
-
-            {
-
-                label:
-                    "OK Count",
-
-                data:
-                    data.map(
-                        m =>
-                            Number(
-                                m.ok_count || 0
-                            )
-                    ),
-
-                backgroundColor:
-                    "green"
-
-            }
-
-        ]
-
-    };
-
-
-    // =====================================================
-    // QTY
-    // =====================================================
-
-    const qtyData = {
-
-        labels:
-            data.map(
-                m => m.bin_no
-            ),
-
-        datasets: [
-
-            {
-
-                label:
-                    "Total Qty",
-
-                data:
-                    data.map(
-                        m =>
-                            Number(
-                                m.qty || 0
-                            )
-                    ),
-
-                backgroundColor:
-                    "blue"
-
-            },
-
-            {
-
-                label:
-                    "Scanned",
-
-                data:
-                    data.map(
-                        m =>
-                            Number(
-                                m.scanned_qty || 0
-                            )
-                    ),
-
-                backgroundColor:
-                    "orange"
-
-            }
-
-        ]
-
-    };
-
-
-    // =====================================================
-    // PRINT
-    // =====================================================
-
-    const handlePrint = async (
-        binNo,
-        partNo,
-        qty
-    ) => {
-
-        try {
-
-            const res =
-                await axios.get(
-                    `${API_URL}/print-label`,
-                    {
-                        params: {
-                            bin_no: binNo,
-                            part_no: partNo,
-                            qty: qty
-                        }
-                    }
-                );
-
-
-            if (
-                res.data?.success
-            ) {
-
-                alert(
-                    "✅ Printed successfully"
-                );
-
-            }
-            else {
-
-                alert(
-                    `❌ ${
-                        res.data?.error ||
-                        "Print failed"
-                    }`
-                );
-
-            }
-
-        }
-        catch (err) {
-
-            console.error(
-                "PRINT ERROR:",
-                err
-            );
-
-
-            alert(
-                "❌ Unable to connect to Python printer service"
-            );
-
-        }
-
-    };
-
-
-    return (
-
-        <div
-            style={{
-                padding: 20
-            }}
-        >
-                        <div className="header">
-            
-                            <img
-                                src={logo}
-                                alt="logo"
-                                className="logo"
-                            />
-            
-                            <a href="/">
-            
-                                <p>
-                                    SCAN
-                                </p>
-            
-                            </a>
-            
-                        </div>
-
-
-            <h2>
-                Production Binning Dashboard
-            </h2>
-
-
-            {/* ============================================
-                ERROR
-            ============================================ */}
-
-            {error && (
-
-                <div
-                    style={{
-                        background: "#ffdddd",
-                        border: "1px solid red",
-                        padding: 10,
-                        marginBottom: 20,
-                        color: "red"
-                    }}
-                >
-
-                    ❌ {error}
-
-                </div>
-
-            )}
-
-
-            {/* ============================================
-                FILTERS
-            ============================================ */}
-
-            <div
-                style={{
-                    display: "flex",
-                    gap: 10,
-                    alignItems: "center",
-                    flexWrap: "wrap"
-                }}
-            >
-
-                <input
-                    placeholder="Bin No"
-                    value={binNo}
-                    onChange={
-                        e =>
-                            setBinNo(
-                                e.target.value
-                            )
-                    }
-                />
-
-
-                <input
-                    placeholder="Part No"
-                    value={partNo}
-                    onChange={
-                        e =>
-                            setPartNo(
-                                e.target.value
-                            )
-                    }
-                />
-
-
-                <label>
-                    From:
-                </label>
-
-
-                <input
-                    type="date"
-                    value={fromDate}
-                    onChange={
-                        e =>
-                            setFromDate(
-                                e.target.value
-                            )
-                    }
-                />
-
-
-                <label>
-                    To:
-                </label>
-
-
-                <input
-                    type="date"
-                    value={toDate}
-                    onChange={
-                        e =>
-                            setToDate(
-                                e.target.value
-                            )
-                    }
-                />
-
-
-                <button
-                    onClick={
-                        handleSearch
-                    }
-                    disabled={
-                        loading
-                    }
-                >
-
-                    {loading
-                        ? "Searching..."
-                        : "Search"
-                    }
-
-                </button>
-
-            </div>
-
-
-            {/* ============================================
-                SUMMARY
-            ============================================ */}
-
-            <div
-                style={{
-                    display: "flex",
-                    gap: 20,
-                    marginTop: 30,
-                    flexWrap: "wrap"
-                }}
-            >
-
-                <div
-                    style={{
-                        border: "2px solid green",
-                        padding: 15,
-                        minWidth: 150
-                    }}
-                >
-
-                    <h3>
-                        Total OK
-                    </h3>
-
-                    <h2>
-                        {totalOK}
-                    </h2>
-
-                </div>
-
-
-                <div
-                    style={{
-                        border: "2px solid red",
-                        padding: 15,
-                        minWidth: 150
-                    }}
-                >
-
-                    <h3>
-                        Total NG
-                    </h3>
-
-                    <h2>
-                        {totalNG}
-                    </h2>
-
-                </div>
-
-
-                <div
-                    style={{
-                        border: "2px solid black",
-                        padding: 15,
-                        minWidth: 150
-                    }}
-                >
-
-                    <h3>
-                        Bins
-                    </h3>
-
-                    <h2>
-                        {data.length}
-                    </h2>
-
-                </div>
-
-            </div>
-
-
-            {/* ============================================
-                PIE
-            ============================================ */}
-
-            <div
-                style={{
-                    display: "flex",
-                    gap: 40,
-                    marginTop: 30
-                }}
-            >
-
-                <div
-                    style={{
-                        width: 300
-                    }}
-                >
-
-                    <h3>
-                        OK vs NG
-                    </h3>
-
-                    <Pie
-                        data={pieData}
-                    />
-
-                </div>
-
-            </div>
-
-
-            {/* ============================================
-                BIN-WISE OK
-            ============================================ */}
-
-            <div
-                style={{
-                    display: "flex",
-                    gap: 40,
-                    marginTop: 30
-                }}
-            >
-
-                <div
-                    style={{
-                        width: 500
-                    }}
-                >
-
-                    <h3>
-                        Bin-wise OK
-                    </h3>
-
-                    <Bar
-                        data={barData}
-                    />
-
-                </div>
-
-            </div>
-
-
-            {/* ============================================
-                QTY VS SCANNED
-            ============================================ */}
-
-            <div
-                style={{
-                    width: 600,
-                    marginTop: 40
-                }}
-            >
-
-                <h3>
-                    Qty vs Scanned
-                </h3>
-
-                <Bar
-                    data={qtyData}
-                />
-
-            </div>
-
-
-            {/* ============================================
-                MASTER DATA
-            ============================================ */}
-
-            {data.map(
-                (m, i) => (
-
-                    <div
-                        key={i}
-                        style={{
-                            border:
-                                "2px solid black",
-                            marginTop: 20,
-                            padding: 10
-                        }}
-                    >
-
-
-                        <h3>
-                            MASTER
-                        </h3>
-
-
-                        <p>
-                            <b>Bin:</b>{" "}
-                            {m.bin_no}
-                        </p>
-
-
-                        <p>
-                            <b>Part:</b>{" "}
-                            {m.part_no}
-                        </p>
-
-
-                        <p>
-                            <b>Part Name:</b>{" "}
-                            {m.part_name}
-                        </p>
-
-
-                        <p>
-                            <b>Qty:</b>{" "}
-                            {m.qty}
-                        </p>
-
-
-                        <p>
-                            <b>Scanned:</b>{" "}
-                            {m.scanned_qty}
-                        </p>
-
-
-                        <p>
-
-                            <b>OK:</b>{" "}
-                            {m.ok_count}
-
-                            {" | "}
-
-                            <b>NG:</b>{" "}
-                            {m.ng_count}
-
-                        </p>
-
-
-                        {/* PRINT */}
-
-                        <button
-                            onClick={() =>
-                                handlePrint(
-                                    m.bin_no,
-                                    m.part_no,
-                                    m.qty
-                                )
-                            }
-                        >
-
-                            Print Label
-
-                        </button>
-
-
-                        {/* =================================
-                            SCAN TABLE
-                        ================================= */}
-
-                        <table
-                            border="1"
-                            width="100%"
-                            style={{
-                                marginTop: 10,
-                                borderCollapse:
-                                    "collapse"
-                            }}
-                        >
-
-                            <thead>
-
-                                <tr>
-
-                                    <th>
-                                        Date
-                                    </th>
-
-                                    <th>
-                                        Time
-                                    </th>
-
-                                    <th>
-                                        Serial
-                                    </th>
-
-                                    <th>
-                                        Result
-                                    </th>
-
-                                </tr>
-
-                            </thead>
-
-
-                            <tbody>
-
-                                {m.scans.map(
-                                    (s, j) => (
-
-                                        <tr
-                                            key={j}
-                                            style={{
-                                                background:
-                                                    s.result === "NG"
-                                                        ? "#ff0101"
-                                                        : "#00ff00"
-                                            }}
-                                        >
-
-                                            <td>
-                                                {s.date}
-                                            </td>
-
-                                            <td>
-                                                {s.time}
-                                            </td>
-
-                                            <td>
-                                                {s.serial_no}
-                                            </td>
-
-                                            <td>
-                                                {s.result}
-                                            </td>
-
-                                        </tr>
-
-                                    )
-                                )}
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                )
-            )}
-
+  const [binNo, setBinNo] = useState("");
+  const [partNo, setPartNo] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSearch = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const res = await axios.get(`${API_URL}/search`, {
+        params: {
+          bin_no: binNo,
+          part_no: partNo,
+          from_date: fromDate,
+          to_date: toDate,
+        },
+      });
+      if (res.data && res.data.error) {
+        setError(res.data.error);
+        setData([]);
+        return;
+      }
+      setData(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("SEARCH ERROR:", err);
+      setError(
+        err.response?.data?.error ||
+          err.message ||
+          "Unable to connect to Python server"
+      );
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalOK = data.reduce((s, m) => s + Number(m.ok_count || 0), 0);
+  const totalNG = data.reduce((s, m) => s + Number(m.ng_count || 0), 0);
+
+  const pieData = {
+    labels: ["OK", "NG"],
+    datasets: [
+      {
+        data: [totalOK, totalNG],
+        backgroundColor: ["#16a34a", "#dc2626"],
+        borderWidth: 0,
+        hoverOffset: 8,
+      },
+    ],
+  };
+
+  const barData = {
+    labels: data.map((m) => m.bin_no),
+    datasets: [
+      {
+        label: "OK Count",
+        data: data.map((m) => Number(m.ok_count || 0)),
+        backgroundColor: "#16a34a",
+        borderRadius: 8,
+        maxBarThickness: 40,
+      },
+    ],
+  };
+
+  const qtyData = {
+    labels: data.map((m) => m.bin_no),
+    datasets: [
+      {
+        label: "Total Qty",
+        data: data.map((m) => Number(m.qty || 0)),
+        backgroundColor: "#2563eb",
+        borderRadius: 8,
+        maxBarThickness: 32,
+      },
+      {
+        label: "Scanned",
+        data: data.map((m) => Number(m.scanned_qty || 0)),
+        backgroundColor: "#f59e0b",
+        borderRadius: 8,
+        maxBarThickness: 32,
+      },
+    ],
+  };
+
+  const handlePrint = async (bin_no, part_no, qty) => {
+    try {
+      const res = await axios.get(`${API_URL}/print-label`, {
+        params: { bin_no, part_no, qty },
+      });
+      if (res.data?.success) alert("✅ Printed successfully");
+      else alert(`❌ ${res.data?.error || "Print failed"}`);
+    } catch (err) {
+      console.error("PRINT ERROR:", err);
+      alert("❌ Unable to connect to Python printer service");
+    }
+  };
+
+  return (
+    <div className="dash">
+      {/* HEADER */}
+      <header className="dash-header">
+        <img src={logo} alt="logo" className="logo" />
+        <a href="/">
+          <p>SCAN</p>
+        </a>
+      </header>
+
+      <h2 className="dash-title">Production Binning Dashboard</h2>
+
+      {/* ERROR */}
+      {error && (
+        <div className="dash-error">
+          <span>❌</span> {error}
         </div>
+      )}
 
-    );
+      {/* FILTERS */}
+      <div className="filters">
+        <div className="field">
+          <label>Bin No</label>
+          <input
+            placeholder="e.g. B-101"
+            value={binNo}
+            onChange={(e) => setBinNo(e.target.value)}
+          />
+        </div>
+        <div className="field">
+          <label>Part No</label>
+          <input
+            placeholder="e.g. P-200"
+            value={partNo}
+            onChange={(e) => setPartNo(e.target.value)}
+          />
+        </div>
+        <div className="field">
+          <label>From</label>
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+          />
+        </div>
+        <div className="field">
+          <label>To</label>
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+          />
+        </div>
+        <div className="field">
+          <label>&nbsp;</label>
+          <button
+            className="btn-search"
+            onClick={handleSearch}
+            disabled={loading}
+          >
+            {loading ? "Searching…" : "Search"}
+          </button>
+        </div>
+      </div>
 
+      {/* SUMMARY */}
+      <div className="summary">
+        <div className="stat-card ok">
+          <div className="stat-label">Total OK</div>
+          <div className="stat-value">{totalOK}</div>
+        </div>
+        <div className="stat-card ng">
+          <div className="stat-label">Total NG</div>
+          <div className="stat-value">{totalNG}</div>
+        </div>
+        <div className="stat-card bins">
+          <div className="stat-label">Bins</div>
+          <div className="stat-value">{data.length}</div>
+        </div>
+      </div>
+
+      {/* CHARTS */}
+      <div className="charts">
+        <div className="chart-card">
+          <h3>OK vs NG</h3>
+          <div className="chart-body">
+            <Pie data={pieData} options={{ maintainAspectRatio: false }} />
+          </div>
+        </div>
+        <div className="chart-card">
+          <h3>Bin-wise OK</h3>
+          <div className="chart-body">
+            <Bar data={barData} options={{ maintainAspectRatio: false }} />
+          </div>
+        </div>
+        <div className="chart-card">
+          <h3>Qty vs Scanned</h3>
+          <div className="chart-body">
+            <Bar data={qtyData} options={{ maintainAspectRatio: false }} />
+          </div>
+        </div>
+      </div>
+
+      {/* MASTER CARDS */}
+      <div className="master-list">
+        {data.map((m, i) => (
+          <div className="master-card" key={i}>
+            <div className="card-head">
+              <h3>MASTER — {m.bin_no}</h3>
+              <button
+                className="btn-print"
+                onClick={() => handlePrint(m.bin_no, m.part_no, m.qty)}
+              >
+                🖨 Print Label
+              </button>
+            </div>
+
+            <div className="meta-grid">
+              <div className="meta">
+                <span>Bin</span>
+                <b>{m.bin_no}</b>
+              </div>
+              <div className="meta">
+                <span>Part</span>
+                <b>{m.part_no}</b>
+              </div>
+              <div className="meta">
+                <span>Part Name</span>
+                <b>{m.part_name}</b>
+              </div>
+              <div className="meta">
+                <span>Qty</span>
+                <b>{m.qty}</b>
+              </div>
+              <div className="meta">
+                <span>Scanned</span>
+                <b>{m.scanned_qty}</b>
+              </div>
+              <div className="meta">
+                <span>OK / NG</span>
+                <b>
+                  <span className="badge ok">{m.ok_count}</span>{" "}
+                  <span className="badge ng">{m.ng_count}</span>
+                </b>
+              </div>
+            </div>
+
+            <div className="scan-table-wrap">
+              <table className="scan">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Serial</th>
+                    <th>Result</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {m.scans.map((s, j) => (
+                    <tr key={j}>
+                      <td>{s.date}</td>
+                      <td>{s.time}</td>
+                      <td>{s.serial_no}</td>
+                      <td>
+                        <span
+                          className={`badge ${
+                            s.result === "NG" ? "ng" : "ok"
+                          }`}
+                        >
+                          {s.result}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
